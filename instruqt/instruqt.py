@@ -12,10 +12,10 @@ class Instruqt:
         headers["Authorization"] = f"Bearer {self.api_key}"
         return requests.post(url, headers=headers, json=body, **kwargs).json()
 
-    def get_invites(self):
+    def get_invites(self, include_expired=False, include_upcoming=True):
         body = {
-            "query": """query TrackInvitesTableInvitesV2($teamSlug: String!) {
-  trackInvitesV2(teamSlug: $teamSlug) {
+            "query": """query TrackInvitesTableInvitesV2($teamSlug: String!, $filters: InviteFilters) {
+  trackInvitesV2(teamSlug: $teamSlug, filters: $filters) {
     items {
       id shareMethod publicTitle title
       contentEdges { id type index refID node {
@@ -34,5 +34,13 @@ class Instruqt:
   }
 }""",
         }
-        body["variables"] = self.variables
+        body["variables"] = {
+            **self.variables,
+            "filters": {"statuses": (
+                ["active", "upcoming", "expired"] if include_expired and include_upcoming
+                else ["active", "upcoming"] if include_upcoming
+                else ["active", "expired"] if include_expired
+                else ["active"]
+            )},
+        }
         return self.request(body).get("data").get("trackInvitesV2").get("items")
