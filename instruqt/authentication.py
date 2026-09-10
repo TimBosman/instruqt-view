@@ -10,4 +10,4 @@ def read_api_key(conf_file="~/.config/instruqt/credentials"):
     return config.get("access_token")
 
 def reroll_api_key():
-    subprocess.run(["instruqt", "track", "push"])
+    subprocess.run(["instruqt", "track", "push"], stdout=open(os.devnull, 'wb'))
