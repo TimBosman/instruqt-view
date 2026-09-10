@@ -21,4 +21,6 @@ if __name__ == "__main__":
     print(tabulate(test, headers=["Public Title", "Expires At", "Status", "Number of tracks"], showindex=True))
     selected_invite = select_invite(len(invites) - 1)
     invite_id = invites[selected_invite].get("id")
-    print(connection.get_activity_report(invite_id))
+    activities = connection.get_activity_report(invite_id).get("plays")
+    test = [[activity.get("user").get("profile").get("display_name"), activity.get("time_spent"), activity.get("track").get("slug"), activity.get("completed_challenges"),activity.get("total_challenges")] for activity in activities]
+    print(tabulate(test, headers=["Display Name", "Time Spent", "Track Title", "Completed Challenges", "Total Challenges"], showindex=True))

@@ -20,20 +20,81 @@ GET_INVITES= """query TrackInvitesTableInvitesV2($teamSlug: String!, $filters: I
   }
 }"""
 
-GET_ACTIVITY_REPORT = """query PlayReports($input: PlayReportInput!) {
-  playReports(input: $input) {
-    items {
+GET_ACTIVITY_REPORT = """query ActivityReportPage($teamSlug: String!, $inviteID: String!) {
+  trackInvite(inviteID: $inviteID) {
+    id
+    type
+    allowAnonymous
+    allowedEmailAddressesOnly
+    title
+    publicTitle
+    contentEdges {
       id
-      startedAt
-      completionPercent
-      timeSpent
-      stoppedReason
-      track { slug title }
+      __typename
+    }
+    claimsPage {
+      totalItems
+      items {
+        id
+        claimedAt
+        playLimit
+        playTTL
+        user {
+          id
+          profile {
+            display_name
+            email
+            __typename
+          }
+          details(teamSlug: $teamSlug) {
+            firstName
+            lastName
+            email
+            id
+            companyName
+            phoneNumber
+            jobTitle
+            jobLevel
+            countryCode
+            usState
+            consent
+            __typename
+          }
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
+    plays {
+      last_activity
+      time_spent
+      track_started_at
+      track_completed_at
+      completed_challenges
+      total_challenges
+      failed_challenge_attempts
+      track {
+        id
+        slug
+        __typename
+      }
+      participant {
+        id
+        __typename
+      }
       user {
         id
-        profile { display_name email }
+        is_anonymous
+        profile {
+          email
+          display_name
+          __typename
+        }
+        __typename
       }
+      __typename
     }
+    __typename
   }
-}
-"""
+}"""

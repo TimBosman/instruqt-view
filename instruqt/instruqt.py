@@ -38,12 +38,11 @@ class Instruqt:
 
     def get_activity_report(self, invite_id):
         body = {
+            "operationName": "ActivityReportPage",
             "query": queries.GET_ACTIVITY_REPORT,
             "variables": {
-                "input": {
-                    **self.variables,
-                    "trackInviteIds": [invite_id],
-                }
+                **self.variables,
+                "inviteID": invite_id,
             }
         }
-        return self.request(body)
+        return self.request(body).get("data").get("trackInvite")
