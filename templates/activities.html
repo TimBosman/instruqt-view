@@ -7,38 +7,99 @@
         <a class="back-link" href="{{ url_for('index') }}">← Back to Invites</a>
         <span class="page-title" style="margin-left: 16px;">{{ title }}</span>
     </div>
-    <input type="text" id="filterInput" placeholder="Filter by name..." oninput="filterTable()">
+    <input type="text" id="filterInput" placeholder="Filter by name or email..." oninput="filterRows()">
 </div>
 
-<table id="activitiesTable">
+<div class="stats-bar">
+    <span>{{ total_students }} student{{ 's' if total_students != 1 else '' }}</span>
+    <span class="stats-sep">·</span>
+    <span>avg <strong>{{ tracks_avg }}</strong> tracks completed</span>
+</div>
+
+<h2 class="section-heading">Student Summary</h2>
+<table id="summaryTable">
     <thead>
         <tr>
+            <th>Status</th>
             <th>Name</th>
-            <th>Track</th>
-            <th>Time Spent</th>
+            <th>Email</th>
             <th>Completed</th>
-            <th>Total</th>
+            <th>Total Time</th>
+            <th>Last Seen</th>
+            <th>Last Track Completed</th>
         </tr>
     </thead>
     <tbody>
-        {% for activity in activities %}
-        {% set name = activity.user.profile.display_name %}
-        <tr data-name="{{ name | lower }}">
-            <td class="td-title">{{ name }}</td>
-            <td>{{ activity.track.slug }}</td>
-            <td>{{ activity.time_spent | format_duration }}</td>
-            <td>{{ activity.completed_challenges }}</td>
-            <td>{{ activity.total_challenges }}</td>
+        {% for u in user_rows %}
+        <tr data-filter="{{ u.name | lower }} {{ u.email | lower }}">
+            <td class="td-icon">{{ u.status_icon }}</td>
+            <td class="td-title">{{ u.name }}</td>
+            <td class="td-muted">{{ u.email }}</td>
+            <td>{{ u.completed_count }}</td>
+            <td>{{ u.total_time | format_duration }}</td>
+            <td class="td-muted">{{ u.last_activity_at | format_datetime }}</td>
+            <td>{{ u.last_completed }}</td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
 
+<h2 class="section-heading">Track Summary</h2>
+<table>
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Track</th>
+            <th>Completed By</th>
+            <th>% of Students</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for t in track_summary %}
+        <tr>
+            <td class="td-muted">{{ loop.index }}</td>
+            <td class="td-title">{{ t.slug }}</td>
+            <td>{{ t.completed }}</td>
+            <td>{{ t.pct }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h2 class="section-heading">Per-Student Detail</h2>
+{% for u in user_rows %}
+<details class="user-detail">
+    <summary>
+        <span class="detail-icon">{{ u.status_icon }}</span>
+        <span class="detail-name">{{ u.name }}</span>
+        <span class="detail-meta">{{ u.completed_count }} completed · {{ u.total_time | format_duration }}</span>
+    </summary>
+    <table class="detail-table">
+        <thead>
+            <tr>
+                <th>Track</th>
+                <th>Status</th>
+                <th>Challenges</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for slug, t in u.tracks | dictsort %}
+            <tr>
+                <td>{{ slug }}</td>
+                <td>{% if t.completed %}✅ Completed{% else %}⬜ In Progress{% endif %}</td>
+                <td>{{ t.completed_challenges }} / {{ t.total_challenges }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</details>
+{% endfor %}
+
 <script>
-    function filterTable() {
+    function filterRows() {
         const query = document.getElementById('filterInput').value.toLowerCase();
-        document.querySelectorAll('#activitiesTable tbody tr').forEach(row => {
-            row.style.display = row.dataset.name.includes(query) ? '' : 'none';
+        document.querySelectorAll('#summaryTable tbody tr').forEach(row => {
+            row.style.display = row.dataset.filter.includes(query) ? '' : 'none';
         });
     }
 </script>
