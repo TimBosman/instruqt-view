@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Activities — {{ title }}{% endblock %}
+
+{% block content %}
+<div class="header-controls">
+    <div>
+        <a class="back-link" href="{{ url_for('index') }}">← Back to Invites</a>
+        <span class="page-title" style="margin-left: 16px;">{{ title }}</span>
+    </div>
+    <input type="text" id="filterInput" placeholder="Filter by name..." oninput="filterTable()">
+</div>
+
+<table id="activitiesTable">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Track</th>
+            <th>Time Spent</th>
+            <th>Completed</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for activity in activities %}
+        {% set name = activity.user.profile.display_name %}
+        <tr data-name="{{ name | lower }}">
+            <td class="td-title">{{ name }}</td>
+            <td>{{ activity.track.slug }}</td>
+            <td>{{ activity.time_spent | format_duration }}</td>
+            <td>{{ activity.completed_challenges }}</td>
+            <td>{{ activity.total_challenges }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script>
+    function filterTable() {
+        const query = document.getElementById('filterInput').value.toLowerCase();
+        document.querySelectorAll('#activitiesTable tbody tr').forEach(row => {
+            row.style.display = row.dataset.name.includes(query) ? '' : 'none';
+        });
+    }
+</script>
+{% endblock %}

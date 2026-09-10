@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Invites — Instruqt View{% endblock %}
+
+{% block content %}
+<div class="header-controls">
+    <span class="page-title">Invites</span>
+    <input type="text" id="filterInput" placeholder="Filter invites..." oninput="filterTable()">
+</div>
+
+<table id="invitesTable">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Expires At</th>
+            <th>Status</th>
+            <th>Tracks</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for invite in invites %}
+        <tr data-title="{{ invite.publicTitle | lower }}">
+            <td class="td-title"><a class="row-link" href="{{ url_for('activities', invite_id=invite.id) }}">{{ invite.publicTitle }}</a></td>
+            <td>{{ invite.expiresAt }}</td>
+            <td>
+                {% if invite.status == 'active' %}
+                    <span class="badge badge-active">Active</span>
+                {% elif invite.status == 'expired' %}
+                    <span class="badge badge-expired">Expired</span>
+                {% else %}
+                    <span class="badge badge-default">{{ invite.status }}</span>
+                {% endif %}
+            </td>
+            <td>{{ invite.contentEdges | length }}</td>
+            <td></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<script>
+    function filterTable() {
+        const query = document.getElementById('filterInput').value.toLowerCase();
+        document.querySelectorAll('#invitesTable tbody tr').forEach(row => {
+            row.style.display = row.dataset.title.includes(query) ? '' : 'none';
+        });
+    }
+</script>
+{% endblock %}
