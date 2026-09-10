@@ -19,3 +19,21 @@ GET_INVITES= """query TrackInvitesTableInvitesV2($teamSlug: String!, $filters: I
     id features { hot_start invite_level_hot_starts instructor_track_invite_creation __typename } __typename
   }
 }"""
+
+GET_ACTIVITY_REPORT = """query PlayReports($input: PlayReportInput!) {
+  playReports(input: $input) {
+    items {
+      id
+      startedAt
+      completionPercent
+      timeSpent
+      stoppedReason
+      track { slug title }
+      user {
+        id
+        profile { display_name email }
+      }
+    }
+  }
+}
+"""

@@ -35,3 +35,15 @@ class Instruqt:
             }
         }
         return self.request(body).get("data").get("trackInvitesV2").get("items")
+
+    def get_activity_report(self, invite_id):
+        body = {
+            "query": queries.GET_ACTIVITY_REPORT,
+            "variables": {
+                "input": {
+                    **self.variables,
+                    "trackInviteIds": [invite_id],
+                }
+            }
+        }
+        return self.request(body)
