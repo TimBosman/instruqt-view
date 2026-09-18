@@ -1,6 +1,7 @@
 #!/bin/python
 
 import argparse
+import math
 import statistics
 from instruqt import instruqt
 from tabulate import tabulate
@@ -150,9 +151,9 @@ def run_ui():
             for a in (report.get("authors") or [])
         } - {""}
 
-        exclude_instructors = request.args.get("exclude_instructors") == "1"
+        include_instructors = request.args.get("include_instructors") == "1"
         users = aggregate_plays(plays)
-        if exclude_instructors and instructor_emails:
+        if not include_instructors and instructor_emails:
             users = {e: u for e, u in users.items() if e.lower() not in instructor_emails}
         total_students = len(users)
 
@@ -174,7 +175,7 @@ def run_ui():
 
         counts = sorted(_completed_count(u) for u in users.values())
         tracks_median = statistics.median(counts) if counts else 0
-        avg_rounded = round(tracks_median)
+        avg_rounded = math.ceil(tracks_median)
 
         max_completed = max(counts) if counts else 0
         max_started = max(_started_count(u) for u in users.values()) if users else 0
@@ -215,7 +216,7 @@ def run_ui():
             progression_breakdown=progression_breakdown,
             total_students=total_students,
             active_page="invites",
-            exclude_instructors=exclude_instructors,
+            include_instructors=include_instructors,
             invite_id=invite_id,
         )
 

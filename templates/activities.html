@@ -9,9 +9,9 @@
     </div>
     <div style="display:flex; gap:12px; align-items:center;">
         <label class="switch-label">
-            <span class="switch-text">Exclude instructors</span>
+            <span class="switch-text">Include instructors</span>
             <div class="switch">
-                <input type="checkbox" {% if exclude_instructors %}checked{% endif %} onchange="toggleInstructors(this)">
+                <input type="checkbox" {% if include_instructors %}checked{% endif %} onchange="toggleInstructors(this)">
                 <span class="switch-slider"></span>
             </div>
         </label>
@@ -168,9 +168,9 @@
     function toggleInstructors(cb) {
         const url = new URL(window.location.href);
         if (cb.checked) {
-            url.searchParams.set('exclude_instructors', '1');
+            url.searchParams.set('include_instructors', '1');
         } else {
-            url.searchParams.delete('exclude_instructors');
+            url.searchParams.delete('include_instructors');
         }
         window.location.href = url.toString();
     }
