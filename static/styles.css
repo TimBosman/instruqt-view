@@ -366,6 +366,64 @@ table.detail-table tr.tr-highlight td {
     color: #69707D;
 }
 
+.switch-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.switch-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: #343741;
+    white-space: nowrap;
+}
+
+.switch {
+    position: relative;
+    width: 40px;
+    height: 22px;
+    flex-shrink: 0;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+}
+
+.switch-slider {
+    position: absolute;
+    inset: 0;
+    background: #D3DAE6;
+    border-radius: 22px;
+    transition: background 0.2s ease;
+}
+
+.switch-slider::before {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    left: 3px;
+    top: 3px;
+    background: #ffffff;
+    border-radius: 50%;
+    transition: transform 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.switch input:checked + .switch-slider {
+    background: #0B64DD;
+}
+
+.switch input:checked + .switch-slider::before {
+    transform: translateX(18px);
+}
+
 table.progression-table {
     margin-bottom: 24px;
 }

@@ -138,12 +138,22 @@ def run_ui():
 
     @app.route("/activities/<invite_id>")
     def activities(invite_id):
+        from flask import request
         invites = connection.get_invites()
         invite = next((inv for inv in invites if inv.get("id") == invite_id), None)
         title = invite.get("publicTitle") if invite else invite_id
-        plays = connection.get_activity_report(invite_id).get("plays")
 
+        report = connection.get_activity_report(invite_id)
+        plays = report.get("plays")
+        instructor_emails = {
+            (a.get("user") or {}).get("profile", {}).get("email", "").strip().lower()
+            for a in (report.get("authors") or [])
+        } - {""}
+
+        exclude_instructors = request.args.get("exclude_instructors") == "1"
         users = aggregate_plays(plays)
+        if exclude_instructors and instructor_emails:
+            users = {e: u for e, u in users.items() if e.lower() not in instructor_emails}
         total_students = len(users)
 
         track_completions = {}
@@ -205,6 +215,8 @@ def run_ui():
             progression_breakdown=progression_breakdown,
             total_students=total_students,
             active_page="invites",
+            exclude_instructors=exclude_instructors,
+            invite_id=invite_id,
         )
 
     app.run(debug=True)

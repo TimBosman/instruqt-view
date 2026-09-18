@@ -7,7 +7,16 @@
         <a class="back-link" href="{{ url_for('index') }}">← Back to Invites</a>
         <span class="page-title" style="margin-left: 16px;">{{ title }}</span>
     </div>
-    <input type="text" id="filterInput" placeholder="Filter by name or email..." oninput="filterRows()">
+    <div style="display:flex; gap:12px; align-items:center;">
+        <label class="switch-label">
+            <span class="switch-text">Exclude instructors</span>
+            <div class="switch">
+                <input type="checkbox" {% if exclude_instructors %}checked{% endif %} onchange="toggleInstructors(this)">
+                <span class="switch-slider"></span>
+            </div>
+        </label>
+        <input type="text" id="filterInput" placeholder="Filter by name or email..." oninput="filterRows()">
+    </div>
 </div>
 
 <h2 class="section-heading">Tracks — Indicators of Progression</h2>
@@ -154,6 +163,16 @@
         document.querySelectorAll('#summaryTable tbody tr').forEach(row => {
             row.style.display = row.dataset.filter.includes(query) ? '' : 'none';
         });
+    }
+
+    function toggleInstructors(cb) {
+        const url = new URL(window.location.href);
+        if (cb.checked) {
+            url.searchParams.set('exclude_instructors', '1');
+        } else {
+            url.searchParams.delete('exclude_instructors');
+        }
+        window.location.href = url.toString();
     }
 </script>
 {% endblock %}

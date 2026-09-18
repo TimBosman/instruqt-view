@@ -28,6 +28,19 @@ GET_ACTIVITY_REPORT = """query ActivityReportPage($teamSlug: String!, $inviteID:
     allowedEmailAddressesOnly
     title
     publicTitle
+    authors {
+      id
+      user {
+        id
+        profile {
+          email
+          display_name
+          __typename
+        }
+        __typename
+      }
+      __typename
+    }
     contentEdges {
       id
       __typename
