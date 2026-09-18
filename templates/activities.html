@@ -10,11 +10,60 @@
     <input type="text" id="filterInput" placeholder="Filter by name or email..." oninput="filterRows()">
 </div>
 
-<div class="stats-bar">
-    <span>{{ total_students }} student{{ 's' if total_students != 1 else '' }}</span>
-    <span class="stats-sep">·</span>
-    <span>avg <strong>{{ tracks_avg }}</strong> tracks completed</span>
+<h2 class="section-heading">Tracks — Indicators of Progression</h2>
+<div class="progression-summary">
+    <div class="progression-stat">
+        <span class="progression-label">Students</span>
+        <strong>{{ total_students }}</strong>
+    </div>
+    <div class="progression-stat">
+        <span class="progression-label">Median completed</span>
+        <strong>{{ tracks_median }}</strong>
+    </div>
+    <div class="progression-stat">
+        <span class="progression-label">Max completed</span>
+        <strong>{{ max_completed }}</strong>
+    </div>
+    <div class="progression-stat">
+        <span class="progression-label">Max started</span>
+        <strong>{{ max_started }}</strong>
+    </div>
+    <div class="progression-stat progression-stat--highlight">
+        <span class="progression-label">✅ On track ({{ tracks_median - 1 }}–{{ tracks_median + 1 }} tracks)</span>
+        <strong>{{ on_track_pct }} ({{ on_track_count }}/{{ total_students }})</strong>
+    </div>
 </div>
+<div class="progression-breakdown">
+    {% for row in progression_breakdown %}
+    <span>✅ {{ row.pct }} completed {{ row.n }} track{{ 's' if row.n != 1 else '' }}</span>
+    {% endfor %}
+</div>
+
+{% set outliers = user_rows | selectattr("status_icon", "ne", "✅") | list %}
+{% if outliers %}
+<table class="progression-table">
+    <thead>
+        <tr>
+            <th>Status</th>
+            <th>Name</th>
+            <th>Completed/Started</th>
+            <th>Last Completed</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for u in outliers %}
+        <tr>
+            <td class="td-icon">{{ u.status_icon }}</td>
+            <td class="td-title">{{ u.name }}</td>
+            <td>{{ u.completed_count }}/{{ u.started_count }}</td>
+            <td>{{ u.last_completed }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="progression-empty">All participants are within one track of the median.</p>
+{% endif %}
 
 <h2 class="section-heading">Student Summary</h2>
 <table id="summaryTable">
@@ -23,10 +72,10 @@
             <th>Status</th>
             <th>Name</th>
             <th>Email</th>
-            <th>Completed</th>
+            <th>Completed/Started</th>
+            <th>Last Completed</th>
             <th>Total Time</th>
             <th>Last Seen</th>
-            <th>Last Track Completed</th>
         </tr>
     </thead>
     <tbody>
@@ -35,10 +84,10 @@
             <td class="td-icon">{{ u.status_icon }}</td>
             <td class="td-title">{{ u.name }}</td>
             <td class="td-muted">{{ u.email }}</td>
-            <td>{{ u.completed_count }}</td>
+            <td>{{ u.completed_count }}/{{ u.started_count }}</td>
+            <td>{{ u.last_completed }}</td>
             <td>{{ u.total_time | format_duration }}</td>
             <td class="td-muted">{{ u.last_activity_at | format_datetime }}</td>
-            <td>{{ u.last_completed }}</td>
         </tr>
         {% endfor %}
     </tbody>
@@ -72,22 +121,26 @@
     <summary>
         <span class="detail-icon">{{ u.status_icon }}</span>
         <span class="detail-name">{{ u.name }}</span>
-        <span class="detail-meta">{{ u.completed_count }} completed · {{ u.total_time | format_duration }}</span>
+        <span class="detail-meta">{{ u.completed_count }}/{{ u.started_count }} completed · {{ u.total_time | format_duration }} · last seen {{ u.last_activity_at | format_datetime }}</span>
     </summary>
     <table class="detail-table">
         <thead>
             <tr>
+                <th>#</th>
                 <th>Track</th>
                 <th>Status</th>
                 <th>Challenges</th>
+                <th>Last Seen</th>
             </tr>
         </thead>
         <tbody>
             {% for slug, t in u.tracks | dictsort %}
-            <tr>
+            <tr{% if t.last_activity_at == u.last_activity_at %} class="tr-highlight"{% endif %}>
+                <td class="td-muted">{{ loop.index }}</td>
                 <td>{{ slug }}</td>
                 <td>{% if t.completed %}✅ Completed{% else %}⬜ In Progress{% endif %}</td>
                 <td>{{ t.completed_challenges }} / {{ t.total_challenges }}</td>
+                <td class="td-muted">{{ t.last_activity_at | format_datetime }}</td>
             </tr>
             {% endfor %}
         </tbody>

@@ -319,3 +319,59 @@ table.detail-table {
 table.detail-table th {
     background-color: #FAFBFC;
 }
+
+table.detail-table tr.tr-highlight td {
+    font-weight: 600;
+}
+
+.progression-summary {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.progression-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 12px 16px;
+    background: #F5F7FA;
+    border-radius: 8px;
+    min-width: 120px;
+}
+
+.progression-stat--highlight {
+    background: #E8F5E9;
+}
+
+.progression-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #69707D;
+}
+
+.progression-stat strong {
+    font-size: 20px;
+    color: #101C3F;
+}
+
+.progression-breakdown {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: #69707D;
+}
+
+table.progression-table {
+    margin-bottom: 24px;
+}
+
+.progression-empty {
+    color: #69707D;
+    font-size: 14px;
+    margin-bottom: 24px;
+}

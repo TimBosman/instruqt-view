@@ -1,6 +1,7 @@
 #!/bin/python
 
 import argparse
+import statistics
 from instruqt import instruqt
 from tabulate import tabulate
 
@@ -46,8 +47,11 @@ def aggregate_plays(plays):
                 "completed_challenges": done,
                 "total_challenges": total,
                 "completed_at": completed_at,
+                "last_activity_at": last_act,
             }
         else:
+            if last_act > existing["last_activity_at"]:
+                existing["last_activity_at"] = last_act
             if completed:
                 existing["completed"] = True
                 existing["completed_challenges"] = done
@@ -65,17 +69,18 @@ def _completed_count(user):
 
 
 def _last_completed_track(user):
-    best_slug, best_date = "", ""
-    for slug, t in user["tracks"].items():
-        if t["completed"] and t["completed_at"] > best_date:
-            best_slug, best_date = slug, t["completed_at"]
-    return best_slug or "—"
+    completed = [slug for slug, t in user["tracks"].items() if t["completed"]]
+    return max(completed) if completed else "—"
+
+
+def _started_count(user):
+    return len(user["tracks"])
 
 
 def _progress_icon(count, avg_rounded):
-    if count > avg_rounded:
+    if count > avg_rounded + 1:
         return "🚀"
-    if count < avg_rounded:
+    if count < avg_rounded - 1:
         return "🏎️💨"
     return "✅"
 
@@ -157,13 +162,30 @@ def run_ui():
             for slug, count in sorted(track_completions.items())
         ]
 
-        tracks_avg = sum(_completed_count(u) for u in users.values()) / total_students if total_students else 0
-        avg_rounded = round(tracks_avg)
+        counts = sorted(_completed_count(u) for u in users.values())
+        tracks_median = statistics.median(counts) if counts else 0
+        avg_rounded = round(tracks_median)
+
+        max_completed = max(counts) if counts else 0
+        max_started = max(_started_count(u) for u in users.values()) if users else 0
+        on_track_count = sum(1 for c in counts if avg_rounded - 1 <= c <= avg_rounded + 1)
+        on_track_pct = f"{on_track_count / total_students * 100:.0f}%" if total_students else "0%"
+
+        def _count_at(n):
+            c = sum(1 for x in counts if x == n)
+            return f"{c / total_students * 100:.0f}% ({c}/{total_students})"
+
+        progression_breakdown = [
+            {"n": avg_rounded + 1, "pct": _count_at(avg_rounded + 1)},
+            {"n": avg_rounded,     "pct": _count_at(avg_rounded)},
+            {"n": avg_rounded - 1, "pct": _count_at(avg_rounded - 1)},
+        ]
 
         user_rows = [
             {
                 **u,
                 "completed_count": _completed_count(u),
+                "started_count": _started_count(u),
                 "last_completed": _last_completed_track(u),
                 "status_icon": _progress_icon(_completed_count(u), avg_rounded),
             }
@@ -175,7 +197,12 @@ def run_ui():
             title=title,
             user_rows=user_rows,
             track_summary=track_summary,
-            tracks_avg=f"{tracks_avg:.1f}",
+            tracks_median=avg_rounded,
+            max_completed=max_completed,
+            max_started=max_started,
+            on_track_count=on_track_count,
+            on_track_pct=on_track_pct,
+            progression_breakdown=progression_breakdown,
             total_students=total_students,
             active_page="invites",
         )
